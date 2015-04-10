@@ -1,8 +1,10 @@
 # Automate some daily pose tasks. Such as creating a folder and opening it up. All from maya
-import os, re, shutil, json, cPickle
+import os, re, shutil, json, desktop, utility
 
 # Script directory
 base_path = os.path.dirname(os.path.realpath(__file__)) # Location of script
+
+# Daily pose
 
 # Template funtionality
 class Template(object):
@@ -10,6 +12,17 @@ class Template(object):
 		self.path = os.path.join( base_path, "template" ) # Path for storing template file
 		if not os.path.exists( self.path ):
 			os.makedirs( self.path )
+
+	def copy(self, path):
+		if os.path.exists( self.path ):
+			try:
+				shutil.copytree( self.path , path )
+				return ""
+			except Exception as e:
+				return e
+		else:
+			return "File already exists."
+
 
 class Data(object):
 	def __init__(self):
@@ -19,44 +32,24 @@ class Data(object):
 
 	def load(self):
 		try:
-			return json.load( self.path )
-		except e:
-			print "ERROR:", e
-			return {}
+			f = open( self.path, "r" )
+			data = json.load( f )
+			f.close()
+			Data["error"] = ""
+			return data
+		except Exception as e:
+			return {"error": e}
 
 	def save(self, data):
 		try:
-			f = open( self.path )
+			f = open( self.path, "w" )
 			json.dump( data, f, encoding="utf-8", indent=4 )
 			f.close()
-			return True
-		except e:
-			print "Could not save data:", e
-			return False
+			return ""
+		except Exception as e:
+			return e
 
 
-class DailyPose(object):
-	def __init__(self):
-		self.pose_dir = "" # directory for storing poses
-		self.loadData()
-		self.saveData()
 
-	# load stored data
-	def loadData(self):
-		try:
-			data = json.load( data_path )
-			self.pose_dir = data["pose_dir"]
-			print "success"
-		except:
-			pass
-
-	def saveData(self):
-		data = {"pose_dir":123}
-
-		f = open( data_path, "w" )
-		json.dump( ["data"], f, encoding="utf-8", indent=True )
-		f.close()
-
-		
-
-DailyPose()
+for line in utility.list( base_path ):
+	print line
