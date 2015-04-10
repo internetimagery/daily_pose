@@ -1,73 +1,28 @@
 # Automate some daily pose tasks. Such as creating a folder and opening it up. All from maya
-import os, re, shutil, json, desktop, utility, datetime
+import app
+import maya.cmds as cmds
 
-# Script directory
-base_path = os.path.dirname(os.path.realpath(__file__))  # Location of script
-
-
-# Daily pose
-class Pose(object):
-    def __init__(self, path):
-        self.date = datetime.date.today()
-        self.date = re.sub("-", "_", "%s" % self.date)
-        self.path = os.path.join(path, self.date)
-        self.template = Template()
-
-    def open(self):
-        if not os.path.exists(self.path):
-            self.template.copy(self.path)
-        desktop.open(self.path)
-
-# Template funtionality
-class Template(object):
+# Fancypants GUI
+class GUI(object):
     def __init__(self):
-        self.path = os.path.join(base_path, "template")  # Path for storing template file
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
+        self.GUI = {}
+        self.GUI["window"] = cmds.window(title = "Pose a day CHALLENGE", rtf = True, s = False)
+        self.GUI["layout1"] = cmds.rowColumnLayout(nc = 2)
 
-    # Copy template into new location
-    def copy(self, path):
-        if os.path.exists(self.path):
-            try:
-                shutil.copytree(self.path, path)
-                return ""
-            except Exception as e:
-                return e
-        else:
-            return "File already exists."
+        self.GUI["layout2"] = cmds.columnLayout(adjustableColumn = True, w = 120)
+        self.GUI["text1"] = cmds.text(label = "STUFF IN HERE")
 
-    # List contents of template
-    def list():
-        return utility.list(self.path)
+        cmds.setParent("..")
 
-    # Open template file
-    def open():
-        desktop.open(self.path)
+        self.GUI["layout3"] = cmds.columnLayout(adjustableColumn = True)
+        self.GUI["button1"] = cmds.button(label = "PUSH ME", h=30, c=self.dummy)
+        cmds.separator()
+        self.GUI["button2"] = cmds.button(label = "PUSH ME TOO", h=30, c=self.dummy)
 
-# Persist data
-class Data(object):
-    def __init__(self):
-        self.path = os.path.join(base_path, "data.json") # Path for storing data file
-        if not os.path.exists(self.path):
-            open(self.path, "w").close()
+        cmds.setParent("..")
 
-    def load(self):
-        try:
-            f = open(self.path, "r")
-            data = json.load(f)
-            f.close()
-            Data["error"] = ""
-            return data
-        except Exception as e:
-            return {"error": e}
+        cmds.setParent("..")
+        cmds.showWindow( self.GUI["window"] )
 
-    def save(self, data):
-        try:
-            f = open(self.path, "w")
-            json.dump(data, f, encoding="utf-8", indent=4)
-            f.close()
-            return ""
-        except Exception as e:
-            return e
-
-test_path = os.path.join(base_path, "test")
+    def dummy(self, arg):
+        return
