@@ -23,6 +23,10 @@ class Template(object):
 		else:
 			return "File already exists."
 
+	# List contents of template
+	def list():
+		return utility.list( self.path )
+
 
 class Data(object):
 	def __init__(self):
@@ -48,8 +52,3 @@ class Data(object):
 			return ""
 		except Exception as e:
 			return e
-
-
-
-for line in utility.list( base_path ):
-	print line
