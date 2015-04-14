@@ -1,7 +1,7 @@
 # Automate some daily pose tasks. Such as creating a folder and opening it up. All from maya
 #reload(__import__('daily_pose'))
 import maya.cmds as cmds
-import os, desktop, shutil
+import os, desktop, shutil, datetime
 from utility import *
 from preferences import Preferences
 
@@ -13,37 +13,62 @@ class MainWindow(object):  # Main GUI window
         self.GUI = {}  # Store GUI elements
         title = "Pose a Day CHALLENGE"
         self.prefs = preferences.Preferences()
+        self.date = datetime.date.today()  # Todays Date
+        location = self.getLocation()
+        allowed_areas = ['right', 'left']
 
         self.GUI['window'] = cmds.window(title=title, rtf=True, s=False)
-        # LEFT ROW
-        self.GUI["layout1"] = cmds.rowColumnLayout(nc=2)
-        self.GUI['layout2'] = cmds.columnLayout(adjustableColumn=True)
-        self.GUI["text1"] = cmds.text(label="STUFF IN HERE")
-
-        cmds.setParent("..")
-        # RIGHT ROW
-        self.GUI["layout3"] = cmds.columnLayout(adjustableColumn=True)
-        self.GUI["button1"] = cmds.button(label="PUSH ME", h=30, c=self.dummy)
-        cmds.separator()
-        self.GUI["button2"] = cmds.button(label="PUSH ME TOO", h=30, c=self.dummy)
-        self.GUI["button3"] = cmds.button(label="Settings", h=30, c=self.openSettings)
+        self.GUI["wrapper"] = cmds.columnLayout(adjustableColumn=True)
 
         allowed_areas = ['right', 'left']
         self.GUI['dock'] = cmds.dockControl(a='left', content=self.GUI['window'], aa=allowed_areas, fl=True, l=title, fcc=self.moveDock, vcc=self.closeDock)
 
-        location = self.getLocation()
         if location == 'float':
+            self.buildFloatLayout()
             cmds.dockControl(self.GUI['dock'], e=True, fl=True)
         elif location in allowed_areas:
+            self.buildDockLayout()
             cmds.dockControl(self.GUI['dock'], e=True, a=location)
+
+    def buildFloatLayout(self):
+        self.GUI["layout1"] = cmds.rowColumnLayout(nc=2, p=self.GUI["wrapper"])
+        # LEFT ROW
+        self.GUI['layout2'] = cmds.columnLayout(adjustableColumn=True, p=self.GUI["layout1"])
+        self.updateImage(self.GUI["layout2"])
+        # RIGHT ROW
+        self.GUI["layout3"] = cmds.columnLayout(width=150,p=self.GUI["layout1"])
+        self.updateButtons(self.GUI["layout3"])
+
+    def buildDockLayout(self):
+        self.GUI['layout2'] = cmds.columnLayout(adjustableColumn=True, p=self.GUI["wrapper"])
+        self.updateImage(self.GUI["layout2"])
+        self.updateButtons(self.GUI["layout2"])
+
+    def purgeGUI(self, *args):
+        children = cmds.layout(self.GUI["wrapper"], q=True, ca=True)
+        if children:
+            for ui in children:
+                cmds.deleteUI(ui, lay=True)
+
+    def updateImage(self, parent):
+        self.GUI["text1"] = cmds.text(label="PUT AN IMAGE IN HERE", p=parent)
+
+    def updateButtons(self, parent):
+        self.GUI["button1"] = cmds.button(label="TODAYS POSE\n\n%s" % self.date, h=80, w=150, c=self.purgeGUI, p=parent)
+        cmds.separator(p=parent)
+        self.GUI["button2"] = cmds.button(label="Settings", h=30, w=150, c=self.openSettings, p=parent)
 
     def moveDock(self):  # Update dock location information
         if cmds.dockControl(self.GUI['dock'], q=True, fl=True):
             self.setLocation("float")
+            self.purgeGUI()
+            self.buildFloatLayout()
             print "Floating Dock."
         else:
             area = cmds.dockControl(self.GUI['dock'], q=True, a=True)
             self.setLocation(area)
+            self.purgeGUI()
+            self.buildDockLayout()
             print "Docking %s." % area
 
     def closeDock(self, *loop):
@@ -68,7 +93,7 @@ class MainWindow(object):  # Main GUI window
         try:
             if cmds.window(self.GUI["settings"], ex=True):
                 cmds.deleteUI(self.GUI["settings"], wnd=True)
-        except AttributeError:
+        except KeyError:
             pass
 
     def dummy(self, arg):
