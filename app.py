@@ -12,6 +12,10 @@ class Pose(object):
         self.path = os.path.join(path, self.date)
         self.template = Template()
 
+    # List contents of template
+    def list(self):
+        return utility.list(self.path)
+
     def open(self):
         if not os.path.exists(self.path):
             self.template.copy(self.path)
@@ -36,11 +40,11 @@ class Template(object):
             return "File already exists."
 
     # List contents of template
-    def list():
+    def list(self):
         return utility.list(self.path)
 
     # Open template file
-    def open():
+    def open(self):
         desktop.open(self.path)
 
 # Persist data

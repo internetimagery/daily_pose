@@ -20,5 +20,4 @@ CVS
 *.pyc
 template/
 
-data.json
-test/
+prefs.json
