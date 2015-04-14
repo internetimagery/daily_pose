@@ -1,6 +1,6 @@
 # Helper utility functions
 import maya.cmds as cmds
-import os, re
+import os, re, sys
 
 # List all files in directory
 
@@ -26,3 +26,16 @@ def list(path, hidden=False):  # Show hidden?
 
 def FileSelect():
     return cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")[0]
+
+
+# Only allow one single instance of class
+
+
+def window(cls):  # Only keep one window open at a time
+    instances = {}
+
+    def getinstance():
+        if (cls in instances and sys.getrefcount(instances[cls]) < 3) or cls not in instances:
+            instances[cls] = cls()
+        return instances[cls]
+    return getinstance

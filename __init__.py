@@ -1,54 +1,18 @@
 # Automate some daily pose tasks. Such as creating a folder and opening it up. All from maya
 #reload(__import__('daily_pose'))
-import app
 import maya.cmds as cmds
-import json, os, utility, desktop, shutil
+import os, desktop, shutil
+from utility import *
+from preferences import Preferences
 
 
-def singleton(cls):  # Only keep one window open at a time
-    instances = {}
-
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-    return getinstance
-
-
-@singleton
-class Preferences(object):
-
-    def __init__(self):
-        self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "prefs.json")
-        try:
-            f = open(self.path, "r")
-            data = json.load(f)
-            self.data = data if data else {}
-            f.close()
-        except IOError:
-            self.data = {}
-
-    def load(self, key):
-        return self.data.get(key, None)
-
-    def save(self, key, val):
-        self.data[key] = val
-        try:
-            f = open(self.path, "w")
-            json.dump(self.data, f, encoding="utf-8", indent=4)
-            f.close()
-        except IOError, e:
-            print e
-
-
-@singleton
+@window
 class MainWindow(object):  # Main GUI window
 
     def __init__(self):
         self.GUI = {}  # Store GUI elements
         title = "Pose a Day CHALLENGE"
-        self.prefs = Preferences()
-        self.settings = ""  # Holder for settings window
+        self.prefs = preferences.Preferences()
 
         self.GUI['window'] = cmds.window(title=title, rtf=True, s=False)
         # LEFT ROW
@@ -98,28 +62,27 @@ class MainWindow(object):  # Main GUI window
         self.prefs.save("location", location)
 
     def openSettings(self, *none):
-        self.settings = SettingsWindow()
+        self.GUI["settings"] = SettingsWindow().GUI["window"]
 
     def cleanUp(self):
         try:
-            settings = self.settings.GUI["window"]
-            if cmds.window(settings, ex=True):
-                cmds.deleteUI(settings, wnd=True)
-        except AttributeError as e:
+            if cmds.window(self.GUI["settings"], ex=True):
+                cmds.deleteUI(self.GUI["settings"], wnd=True)
+        except AttributeError:
             pass
 
     def dummy(self, arg):
         print "hello"
 
 
-@singleton
+@window
 class SettingsWindow(object):  # Settings window window
 
     def __init__(self):
         self.GUI = {}  # Store GUI elements
-        title = "Settings:"
-        self.prefs = Preferences()
+        self.prefs = preferences.Preferences()  # Preferences
 
+        title = "Settings:"
         self.GUI['window'] = cmds.window(title=title, rtf=True, s=False)
         self.GUI['layout1'] = cmds.columnLayout(adjustableColumn=True)
         self.GUI["text1"] = cmds.text(label="Settings")
@@ -149,13 +112,13 @@ class SettingsWindow(object):  # Settings window window
             cmds.messageBox(title="Uh oh...", message="Could not find your template file...\n%s" % path)
 
     def setTemplate(self, *none):
-        path = utility.FileSelect()
+        path = FileSelect()
         print "Set template to: %s." % path
         self.prefs.save("template_path", path)
         self.updateTemplate()
 
     def setPoseFolder(self, *none):
-        path = utility.FileSelect()
+        path = FileSelect()
         print "Set pose folder to %s." % path
         self.prefs.save("pose_path", path)
         self.updatePoseFolder()
@@ -176,7 +139,7 @@ def init():
     template = os.path.join(os.path.dirname(os.path.realpath(__file__)), "template")
     if not os.path.exists(template):
         os.makedirs(template)
-    prefs = Preferences()
+    prefs = preferences.Preferences()
     if not prefs.load("template_path"):
         prefs.save("template_path", template)
 
