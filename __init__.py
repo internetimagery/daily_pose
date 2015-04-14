@@ -80,10 +80,11 @@ class MainWindow(object):  # Main GUI window
             print "Window closed."
 
     def getLocation(self):
-        return self.prefs.load("location")
+        dock = self.prefs.load("dock_location")
+        return dock if dock else "float"
 
     def setLocation(self, location):
-        self.prefs.save("location", location)
+        self.prefs.save("dock_location", location)
 
     def openSettings(self, *none):
         self.GUI["settings"] = settings.SettingsWindow().GUI["window"]

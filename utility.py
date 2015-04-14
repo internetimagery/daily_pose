@@ -1,6 +1,6 @@
 # Helper utility functions
 import maya.cmds as cmds
-import os, re, sys
+import os, re, sys, desktop
 
 # List all files in directory
 
@@ -26,6 +26,14 @@ def list(path, hidden=False):  # Show hidden?
 
 def FileSelect():
     return cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")[0]
+
+
+# Folder open
+
+
+def FolderOpen(path):
+    if os.path.exists(path):
+        desktop.open(path)
 
 
 # Only allow one single instance of class
