@@ -24,11 +24,11 @@ class MainWindow(object):  # Main GUI window
         self.GUI['dock'] = cmds.dockControl(a='left', content=self.GUI['window'], aa=allowed_areas, fl=True, l=title, fcc=self.moveDock, vcc=self.closeDock)
 
         if location == 'float':
-            self.buildFloatLayout()
             cmds.dockControl(self.GUI['dock'], e=True, fl=True)
+            self.buildFloatLayout()
         elif location in allowed_areas:
-            self.buildDockLayout()
             cmds.dockControl(self.GUI['dock'], e=True, a=location)
+            self.buildDockLayout()
 
     def buildFloatLayout(self):
         self.GUI["layout1"] = cmds.rowColumnLayout(nc=2, p=self.GUI["wrapper"])
@@ -51,10 +51,11 @@ class MainWindow(object):  # Main GUI window
                 cmds.deleteUI(ui, lay=True)
 
     def updateImage(self, parent):
-        self.GUI["text1"] = cmds.text(label="PUT AN IMAGE IN HERE", p=parent)
+        img = os.path.join(os.path.dirname(os.path.realpath(__file__)), "dailypose.jpg")
+        self.GUI["image1"] = cmds.image(image=img, p=parent)
 
     def updateButtons(self, parent):
-        self.GUI["button1"] = cmds.button(label="TODAYS POSE\n\n%s" % self.date, h=80, w=150, c=self.purgeGUI, p=parent)
+        self.GUI["button1"] = cmds.button(label="TODAYS POSE\n\n%s" % self.date, h=80, w=150, c=self.dummy, p=parent)
         cmds.separator(p=parent)
         self.GUI["button2"] = cmds.button(label="Settings", h=30, w=150, c=self.openSettings, p=parent)
 
@@ -63,13 +64,11 @@ class MainWindow(object):  # Main GUI window
             self.setLocation("float")
             self.purgeGUI()
             self.buildFloatLayout()
-            print "Floating Dock."
         else:
             area = cmds.dockControl(self.GUI['dock'], q=True, a=True)
             self.setLocation(area)
             self.purgeGUI()
             self.buildDockLayout()
-            print "Docking %s." % area
 
     def closeDock(self, *loop):
         visible = cmds.dockControl(self.GUI['dock'], q=True, vis=True)
