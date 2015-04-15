@@ -1,9 +1,8 @@
 # Automate some daily pose tasks. Such as creating a folder and opening it up. All from maya
 #reload(__import__('daily_pose'))
 import maya.cmds as cmds
-import os, desktop, shutil, datetime, settings
+import os, datetime, settings, preferences
 from utility import *
-from preferences import Preferences
 
 
 @window
@@ -18,7 +17,7 @@ class MainWindow(object):  # Main GUI window
         allowed_areas = ['right', 'left']
 
         self.GUI['window'] = cmds.window(title=title, rtf=True, s=False)
-        self.GUI["wrapper"] = cmds.columnLayout(adjustableColumn=True)
+        self.GUI["wrapper"] = cmds.columnLayout(adjustableColumn=True, bgc=[0.9, 0.9, 0.9])
 
         allowed_areas = ['right', 'left']
         self.GUI['dock'] = cmds.dockControl(a='left', content=self.GUI['window'], aa=allowed_areas, l=title, fcc=self.moveDock, vcc=self.closeDock)
@@ -36,7 +35,7 @@ class MainWindow(object):  # Main GUI window
         self.GUI['layout2'] = cmds.columnLayout(adjustableColumn=True, p=self.GUI["layout1"])
         self.updateImage(self.GUI["layout2"])
         # RIGHT ROW
-        self.GUI["layout3"] = cmds.columnLayout(width=150,p=self.GUI["layout1"])
+        self.GUI["layout3"] = cmds.columnLayout(width=150, p=self.GUI["layout1"])
         self.updateButtons(self.GUI["layout3"])
 
     def buildDockLayout(self):
@@ -51,7 +50,7 @@ class MainWindow(object):  # Main GUI window
                 cmds.deleteUI(ui, lay=True)
 
     def updateImage(self, parent):
-        img = os.path.join(os.path.dirname(os.path.realpath(__file__)), "dailypose.jpg")
+        img = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images", "dailypose.jpg")
         self.GUI["image1"] = cmds.image(image=img, p=parent)
 
     def updateButtons(self, parent):

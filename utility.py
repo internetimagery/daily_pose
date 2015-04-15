@@ -1,10 +1,9 @@
 # Helper utility functions
 import maya.cmds as cmds
-import os, re, sys, desktop
+import os, re, sys, desktop, webbrowser
+
 
 # List all files in directory
-
-
 def list(path, hidden=False):  # Show hidden?
     result = []
     regex = re.compile("%s/?" % path)  # Remove base path for relative URL's
@@ -22,23 +21,22 @@ def list(path, hidden=False):  # Show hidden?
 
 
 # Select a folder prompt
-
-
 def FileSelect():
     return cmds.fileDialog2(ds=2, cap="Select a Folder.", fm=3, okc="Select")[0]
 
 
 # Folder open
-
-
 def FolderOpen(path):
     if os.path.exists(path):
         desktop.open(path)
 
 
+# Url Open
+def UrlOpen(url):
+    webbrowser.open(url, new=2, autoraise=True)
+
+
 # Only allow one single instance of class
-
-
 def window(cls):  # Only keep one window open at a time
     instances = {}
 
